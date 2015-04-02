@@ -19,7 +19,7 @@
 
 # Sahitha Nelanga De Silva
 
-# Kavindu Yudeesha Narathota
+# Kavindu Yudeesha Lakshan Narathota
 
 # Dilina Namal Weerasinghe
 

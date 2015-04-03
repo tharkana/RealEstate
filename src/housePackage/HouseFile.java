@@ -12,6 +12,7 @@
  * @author Tharkana
  */
 
+package housePackage;
 
 import java.io.*;
 

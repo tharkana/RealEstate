@@ -9,19 +9,12 @@
 
 /**
  *
- * @author Kavindu
+ * @author 
  */
 
-public class Test {
+package housePackage;
 
-	public static void main(String[] args) {
-		System.out.println("Please use this class for testing");
-		System.out.println("Committing example"
-				+ "Before make any changes always pull the project from the GIT"
-				+ "This is how ur gonna commit the code"
-				+ "Save ur changes first"
-				+ "");
 
-	}
-
+public class SortedList extends List {
+	
 }

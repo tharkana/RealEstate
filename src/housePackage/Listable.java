@@ -9,13 +9,12 @@
 
 /**
  *
- * @author Tharkana
+ * @author 
  */
+package housePackage;
 
-public class RealEstate {
+public interface Listable {
 
-	public static void main(String[] args) {
-		System.out.println("blaaaaaaaa");
-	}
+	
 
 }

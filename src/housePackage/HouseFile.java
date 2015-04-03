@@ -22,12 +22,74 @@ public class HouseFile {
 	private static PrintWriter outFile;
 	private static boolean inFileOpen = false;
 	private static boolean outFileOpen = false;
-	private static String nextLine = ""; // Holds "next" line from file
+	private static String nextLine = "";
 
-	// Equals null if at end of file
-	public static void reset() throws IOException
-	// Reset file for reading
-	{
+	// private FileOutputStream fout = null;
+	// private ObjectOutputStream oos = null;
+	// private FileInputStream fin = null;
+	// private ObjectInputStream ois = null;
+	// private static boolean foutOpen = false;
+	// private static boolean finOpen = false;
+	//
+	//
+	// /**
+	// * write to the file
+	// * @param houseList
+	// */
+	// public void writeToFile(Listable houseList[]) {
+	//
+	// try {
+	//
+	// fout = new FileOutputStream("./tk.ser");
+	// oos = new ObjectOutputStream(fout);
+	// oos.writeObject(houseList);
+	//
+	// } catch (IOException ex) {
+	// Logger.getLogger(HouseFile.class.getName()).log(Level.SEVERE, null, ex);
+	// } finally {
+	// try {
+	// fout.close();
+	// } catch (IOException ex) {
+	// Logger.getLogger(HouseFile.class.getName()).log(Level.SEVERE, null, ex);
+	// }
+	// }
+	//
+	// }
+	//
+	// /**
+	// * read file and put the data to a List
+	// * @return
+	// */
+	// public Listable[] readFile(Listable houseList[]) {
+	//
+	// try {
+	//
+	// if (finOpen) {
+	// writeToFile(houseList);
+	// fin.close();
+	// }
+	// fin = new FileInputStream("./tk.ser");
+	// ois = new ObjectInputStream(fin);
+	// houseList = (Listable[]) ois.readObject();
+	//
+	// } catch (IOException ex) {
+	// Logger.getLogger(HouseFile.class.getName()).log(Level.SEVERE, null, ex);
+	// } catch (ClassNotFoundException ex) {
+	// Logger.getLogger(HouseFile.class.getName()).log(Level.SEVERE, null, ex);
+	// } finally {
+	// try {
+	// fout.close();
+	// } catch (IOException ex) {
+	// Logger.getLogger(HouseFile.class.getName()).log(Level.SEVERE, null, ex);
+	// }
+	// }
+	//
+	// return houseList;
+	//
+	// }
+
+	public static void reset() throws IOException {
+
 		if (inFileOpen)
 			inFile.close();
 		if (outFileOpen)
@@ -37,9 +99,7 @@ public class HouseFile {
 		nextLine = inFile.readLine();
 	}
 
-	public static void rewrite() throws IOException
-	// Reset file for writing
-	{
+	public static void rewrite() throws IOException {
 		if (inFileOpen)
 			inFile.close();
 		if (outFileOpen)
@@ -48,20 +108,14 @@ public class HouseFile {
 		outFileOpen = true;
 	}
 
-	public static boolean moreHouses()
-	// Returns true if file open for reading and there is still more house
-	// information available in it
-	{
+	public static boolean moreHouses() {
 		if (!inFileOpen || (nextLine == null))
 			return false;
 		else
 			return true;
 	}
 
-	public static ListHouse getNextHouse() throws IOException
-	// Gets and returns house information from the house info file
-	// Precondition: inFile is open and holds more house information
-	{
+	public static ListHouse getNextHouse() throws IOException {
 		String lastName = "xxxxx";
 		String firstName = "xxxxx";
 		int lotNumber = 0;
@@ -80,10 +134,7 @@ public class HouseFile {
 		return house;
 	}
 
-	public static void putToFile(ListHouse house) throws IOException
-	// Puts parameter house information into the house info file
-	// Precondition: outFile is open
-	{
+	public static void putToFile(ListHouse house) throws IOException {
 		outFile.println(house.lastName());
 		outFile.println(house.firstName());
 		outFile.println(house.lotNumber());
@@ -92,9 +143,7 @@ public class HouseFile {
 		outFile.println(house.bedRooms());
 	}
 
-	public static void close() throws IOException
-	// Closes house info file
-	{
+	public static void close() throws IOException {
 		if (inFileOpen)
 			inFile.close();
 		if (outFileOpen)

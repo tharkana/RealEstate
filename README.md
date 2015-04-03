@@ -19,10 +19,10 @@ Supervised by - Dr. Sameh Abdalla (http://disi.unitn.it/~sameh/)
 ********************************************************************************
 Team FantasticFive
 
-# 14208893	Sahitha Nelanga H De Silva
-# 14208971	Tharkana D Kodagoda
-# 14209059	Dilina Namal Weerasinghe
-# 14209074	P W Poorni Yasodara
-# 14209759	Kavindu Yudeesha Lakshan Narathota
+* 14208893	Sahitha Nelanga H De Silva
+* 14208971	Tharkana D Kodagoda
+* 14209059	Dilina Namal Weerasinghe
+* 14209074	P W Poorni Yasodara
+* 14209759	Kavindu Yudeesha Lakshan Narathota
 
 ********************************************************************************

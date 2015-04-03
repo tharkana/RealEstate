@@ -7,284 +7,766 @@
  * permission of Team FantasticFive
  *******************************************************************************/
 
- package housePackage;
-
 /**
  *
  * @author Sahitha Nelanga
  */
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.border.*;
-import java.io.*;
 
-public class RealEstate {
+package housePackage;
 
-	private static SortedList list = new SortedList();
-	
-	private static JTextField lotText; 
-	private static JTextField firstText; 
-	private static JTextField lastText; 
-	private static JTextField priceText; 
-	private static JTextField ftText; 
-	private static JTextField bedText; 
-	
-	private static JLabel statLabel; 
-	
+import com.sun.glass.events.KeyEvent;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
-	private static void showHouse(ListHouse house) {
-		lotText.setText(Integer.toString(house.lotNumber()));
-		firstText.setText(house.firstName());
-		lastText.setText(house.lastName());
-		priceText.setText(Integer.toString(house.price()));
-		ftText.setText(Integer.toString(house.squareFeet()));
-		bedText.setText(Integer.toString(house.bedRooms()));
-	}
 
-	private static ListHouse getHouse() {
-		String lastName;
-		String firstName;
-		int lotNumber;
-		int price;
-		int squareFeet;
-		int bedRooms;
-		lotNumber = Integer.parseInt(lotText.getText());
-		firstName = firstText.getText();
-		lastName = lastText.getText();
-		price = Integer.parseInt(priceText.getText());
-		squareFeet = Integer.parseInt(ftText.getText());
-		bedRooms = Integer.parseInt(bedText.getText());
-		ListHouse house = new ListHouse(lastName, firstName, lotNumber, price,
-				squareFeet, bedRooms);
-		return house;
-	}
+public class RealEstate extends javax.swing.JFrame {
 
-	private static void clearHouse() {
-		lotText.setText("");
-		firstText.setText("");
-		lastText.setText("");
-		priceText.setText("");
-		ftText.setText("");
-		bedText.setText("");
-	}
+    private SortedList list = new SortedList();
+    private ListHouse house;
 
-	private static class ActionHandler implements ActionListener {
-		public void actionPerformed(ActionEvent event)
-		
-		{
-			ListHouse house;
-			if (event.getActionCommand().equals("Reset")) { 
-															
-				list.reset();
-				if (list.lengthIs() == 0)
-					clearHouse();
-				else {
-					house = (ListHouse) list.getNextItem();
-					showHouse(house);
-				}
-				statLabel.setText("List reset");
-			} else if (event.getActionCommand().equals("Next")) { 
-																	
-																	
-				if (list.lengthIs() == 0)
-					statLabel.setText("list is empty!");
-				else {
-					house = (ListHouse) list.getNextItem();
-					showHouse(house);
-					statLabel.setText("Next house displayed");
-				}
-			} else if (event.getActionCommand().equals("Add")) { 
-																	
-				try {
-					house = getHouse();
-					if (list.isThere(house))
-						statLabel.setText("Lot number already in use");
-					else {
-						list.insert(house);
-						statLabel.setText("House added to list");
-					}
-				} catch (NumberFormatException badHouseData) {
-					
-					statLabel.setText("Number? " + badHouseData.getMessage());
-				}
-			} else if (event.getActionCommand().equals("Delete")) { 
-																	
-																	
-				try {
-					house = getHouse();
-					if (list.isThere(house)) {
-						list.delete(house);
-						statLabel.setText("House deleted");
-					} else
-						statLabel.setText("Lot number not on list");
-				} catch (NumberFormatException badHouseData) {
-					
-					statLabel.setText("Number? " + badHouseData.getMessage());
-				}
-			} else if (event.getActionCommand().equals("Clear")) { 
-																	
-																	
-				clearHouse();
-				statLabel.setText(list.lengthIs() + " houses on list");
-			} else if (event.getActionCommand().equals("Find")) { 
-																	
-																	
-				int lotNumber;
-				try {
-					lotNumber = Integer.parseInt(lotText.getText());
-					house = new ListHouse("", "", lotNumber, 0, 0, 0);
-					if (list.isThere(house)) {
-						house = (ListHouse) list.retrieve(house);
-						showHouse(house);
-						statLabel.setText("House found");
-					} else
-						statLabel.setText("House not found");
-				} catch (NumberFormatException badHouseData) {
-					
-					statLabel.setText("Number? " + badHouseData.getMessage());
-				}
-			}
-		}
-	}
+    /**
+     * Creates new form MainFrame
+     */
+    public RealEstate() {
+        
+            initComponents();
+            
+         try {   
+            // Load info from house file into list
+            HouseFile.reset();
+            while (HouseFile.moreHouses()) {
+                house = HouseFile.getNextHouse();
+                list.insert(house);
+            }
+            // If possible insert info about first house into text fields
+            list.reset();
+            if (list.lengthIs() != 0) {
+                house = (ListHouse) list.getNextItem();
+                showHouse(house);
+            }
+            // Update status
+            statusLabel.setText(list.lengthIs() + " houses on list ");
+        } catch (IOException ex) {
+            Logger.getLogger(RealEstate.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
-	public static void main(String args[]) throws IOException {
-		ListHouse house;
-		char command;
-		int length;
-		JLabel blankLabel; 
-		JLabel lotLabel; 
-		JLabel firstLabel;
-		JLabel lastLabel;
-		JLabel priceLabel;
-		JLabel feetLabel;
-		JLabel bedLabel;
-		JButton reset; 
-		JButton next; 
-		JButton add; 
-		JButton delete; 
-		JButton clear; 
-		JButton find; 
-		ActionHandler action; 
-		
-		JFrame displayFrame = new JFrame();
-		displayFrame.setTitle("Real Estate Program");
-		displayFrame.setSize(350, 400);
-		displayFrame.addWindowListener(new WindowAdapter() 
-				
-				{
-					public void windowClosing(WindowEvent event) {
-						ListHouse house;
-						displayFrame.dispose(); 
-						try {
-							// Save data from list file to house file
-							HouseFile.rewrite();
-							list.reset();
-							int length = list.lengthIs();
-							for (int counter = 1; counter <= length; counter++) {
-								house = (ListHouse) list.getNextItem();
-								HouseFile.putToFile(house);
-							}
-							HouseFile.close();
-						} catch (IOException fileCloseProblem) {
-							System.out
-									.println("Exception raised concerning the house info file "
-											+ "upon program termination");
-						}
-						System.exit(0); // Quit program
-					}
-				});
-				
-		// Instantiate content pane and information panel
-		
-		Container contentPane = displayFrame.getContentPane();
-		JPanel infoPanel = new JPanel();
-		
-		// Instantiate/initialize labels, and text fields
-		
-		statLabel = new JLabel("", JLabel.CENTER);
-		statLabel.setBorder(new LineBorder(Color.red));
-		blankLabel = new JLabel("");
-		lotLabel = new JLabel("Lot Number: ", JLabel.RIGHT);
-		lotText = new JTextField("", 15);
-		firstLabel = new JLabel("First Name: ", JLabel.RIGHT);
-		firstText = new JTextField("", 15);
-		lastLabel = new JLabel("Last Name: ", JLabel.RIGHT);
-		lastText = new JTextField("", 15);
-		priceLabel = new JLabel("Price: ", JLabel.RIGHT);
-		priceText = new JTextField("", 15);
-		feetLabel = new JLabel("Square Feet: ", JLabel.RIGHT);
-		ftText = new JTextField("", 15);
-		bedLabel = new JLabel("Number of Bedrooms: ", JLabel.RIGHT);
-		bedText = new JTextField("", 15);
-		
-		// Instantiate/register buttons
-		
-		reset = new JButton("Reset");
-		next = new JButton("Next");
-		add = new JButton("Add");
-		delete = new JButton("Delete");
-		clear = new JButton("Clear");
-		find = new JButton("Find");
-		
-		// Instantiate/register button listeners
-		
-		action = new ActionHandler();
-		reset.addActionListener(action);
-		next.addActionListener(action);
-		add.addActionListener(action);
-		delete.addActionListener(action);
-		clear.addActionListener(action);
-		find.addActionListener(action);
-		
-		// Load data from house file to list
-		
-		HouseFile.reset();
-		while (HouseFile.moreHouses()) {
-			house = HouseFile.getNextHouse();
-			list.insert(house);
-		}
-		
-		// If possible, insert data about first house into text fields
-		
-		list.reset();
-		if (list.lengthIs() != 0) {
-			house = (ListHouse) list.getNextItem();
-			showHouse(house);
-		}
-		
-		// Update status
-		
-		statLabel.setText(list.lengthIs() + " houses on list ");
-		
-		// Add components to frame
-		
-		infoPanel.setLayout(new GridLayout(10, 2));
-		infoPanel.add(statLabel);
-		infoPanel.add(blankLabel);
-		infoPanel.add(lotLabel);
-		infoPanel.add(lotText);
-		infoPanel.add(firstLabel);
-		infoPanel.add(firstText);
-		infoPanel.add(lastLabel);
-		infoPanel.add(lastText);
-		infoPanel.add(priceLabel);
-		infoPanel.add(priceText);
-		infoPanel.add(feetLabel);
-		infoPanel.add(ftText);
-		infoPanel.add(bedLabel);
-		infoPanel.add(bedText);
-		infoPanel.add(reset);
-		infoPanel.add(next);
-		infoPanel.add(add);
-		infoPanel.add(delete);
-		infoPanel.add(clear);
-		infoPanel.add(find);
-		
-		// Setup and showframe
-		
-		contentPane.add(infoPanel);
-		displayFrame.show();
-	}
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
+    private void initComponents() {
+
+        jTextField3 = new javax.swing.JTextField();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        lblLot = new javax.swing.JLabel();
+        lblFname = new javax.swing.JLabel();
+        lblLname = new javax.swing.JLabel();
+        lblPrice = new javax.swing.JLabel();
+        lblSqr = new javax.swing.JLabel();
+        lblRoom = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
+        jButton5 = new javax.swing.JButton();
+        jButton6 = new javax.swing.JButton();
+        txtLot = new javax.swing.JTextField();
+        txtFname = new javax.swing.JTextField();
+        txtLname = new javax.swing.JTextField();
+        txtPrice = new javax.swing.JTextField();
+        txtSqure = new javax.swing.JTextField();
+        txtRoom = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
+        statusLabel = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+
+        jTextField3.setText("jTextField3");
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Real Estate Log - FantasticFive");
+        setUndecorated(true);
+        setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                formWindowClosed(evt);
+            }
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
+
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel1.setPreferredSize(new java.awt.Dimension(450, 500));
+
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 2, 14)); // NOI18N
+        jLabel1.setText("   ");
+
+        lblLot.setBackground(new java.awt.Color(255, 250, 250));
+        lblLot.setFont(new java.awt.Font("Segoe UI", 2, 16)); // NOI18N
+        lblLot.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblLot.setText("  Lot Number");
+        lblLot.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED, null, new java.awt.Color(204, 204, 204)));
+        lblLot.setOpaque(true);
+
+        lblFname.setBackground(new java.awt.Color(255, 250, 250));
+        lblFname.setFont(new java.awt.Font("Segoe UI", 2, 16)); // NOI18N
+        lblFname.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblFname.setText("  First Name");
+        lblFname.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED, null, new java.awt.Color(204, 204, 204)));
+        lblFname.setOpaque(true);
+        lblFname.setPreferredSize(new java.awt.Dimension(200, 30));
+
+        lblLname.setBackground(new java.awt.Color(255, 250, 250));
+        lblLname.setFont(new java.awt.Font("Segoe UI", 2, 16)); // NOI18N
+        lblLname.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblLname.setText("  Last Name");
+        lblLname.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED, null, new java.awt.Color(204, 204, 204)));
+        lblLname.setOpaque(true);
+        lblLname.setPreferredSize(new java.awt.Dimension(200, 30));
+
+        lblPrice.setBackground(new java.awt.Color(255, 250, 250));
+        lblPrice.setFont(new java.awt.Font("Segoe UI", 2, 16)); // NOI18N
+        lblPrice.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblPrice.setText("  Price");
+        lblPrice.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED, null, new java.awt.Color(204, 204, 204)));
+        lblPrice.setOpaque(true);
+        lblPrice.setPreferredSize(new java.awt.Dimension(200, 30));
+
+        lblSqr.setBackground(new java.awt.Color(255, 250, 250));
+        lblSqr.setFont(new java.awt.Font("Segoe UI", 2, 16)); // NOI18N
+        lblSqr.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblSqr.setText("  Square Feet");
+        lblSqr.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED, null, new java.awt.Color(204, 204, 204)));
+        lblSqr.setOpaque(true);
+        lblSqr.setPreferredSize(new java.awt.Dimension(200, 30));
+
+        lblRoom.setBackground(new java.awt.Color(255, 250, 250));
+        lblRoom.setFont(new java.awt.Font("Segoe UI", 2, 16)); // NOI18N
+        lblRoom.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblRoom.setText("  No. of Bed Rooms");
+        lblRoom.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED, null, new java.awt.Color(204, 204, 204)));
+        lblRoom.setOpaque(true);
+        lblRoom.setPreferredSize(new java.awt.Dimension(200, 30));
+
+        jButton1.setFont(new java.awt.Font("Tahoma", 2, 14)); // NOI18N
+        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/edit-clear-2.png"))); // NOI18N
+        jButton1.setText("Clear");
+        jButton1.setMaximumSize(new java.awt.Dimension(130, 35));
+        jButton1.setPreferredSize(new java.awt.Dimension(130, 35));
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        jButton2.setFont(new java.awt.Font("Tahoma", 2, 14)); // NOI18N
+        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/edit-find-9.png"))); // NOI18N
+        jButton2.setText("Search");
+        jButton2.setMaximumSize(new java.awt.Dimension(130, 35));
+        jButton2.setPreferredSize(new java.awt.Dimension(130, 35));
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
+        jButton3.setFont(new java.awt.Font("Tahoma", 2, 14)); // NOI18N
+        jButton3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/go-next-3.png"))); // NOI18N
+        jButton3.setText("Next");
+        jButton3.setMaximumSize(new java.awt.Dimension(130, 35));
+        jButton3.setPreferredSize(new java.awt.Dimension(130, 35));
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
+        jButton4.setFont(new java.awt.Font("Tahoma", 2, 14)); // NOI18N
+        jButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/document-quick_restart.png"))); // NOI18N
+        jButton4.setText("Reset");
+        jButton4.setMaximumSize(new java.awt.Dimension(130, 35));
+        jButton4.setPreferredSize(new java.awt.Dimension(130, 35));
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+
+        jButton5.setFont(new java.awt.Font("Tahoma", 2, 14)); // NOI18N
+        jButton5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/list-add-5.png"))); // NOI18N
+        jButton5.setText("Add");
+        jButton5.setMaximumSize(new java.awt.Dimension(130, 35));
+        jButton5.setPreferredSize(new java.awt.Dimension(130, 35));
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
+
+        jButton6.setFont(new java.awt.Font("Tahoma", 2, 14)); // NOI18N
+        jButton6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/edit-delete-9.png"))); // NOI18N
+        jButton6.setText("Delete");
+        jButton6.setMaximumSize(new java.awt.Dimension(130, 35));
+        jButton6.setPreferredSize(new java.awt.Dimension(130, 35));
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
+
+        txtLot.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtLot.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        txtLot.setMaximumSize(new java.awt.Dimension(150, 30));
+        txtLot.setPreferredSize(new java.awt.Dimension(150, 30));
+        txtLot.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtLotKeyTyped(evt);
+            }
+        });
+
+        txtFname.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtFname.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        txtFname.setMaximumSize(new java.awt.Dimension(150, 30));
+        txtFname.setPreferredSize(new java.awt.Dimension(150, 30));
+        txtFname.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtFnameKeyTyped(evt);
+            }
+        });
+
+        txtLname.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtLname.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        txtLname.setMaximumSize(new java.awt.Dimension(150, 30));
+        txtLname.setPreferredSize(new java.awt.Dimension(150, 30));
+        txtLname.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtLnameKeyTyped(evt);
+            }
+        });
+
+        txtPrice.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtPrice.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        txtPrice.setMaximumSize(new java.awt.Dimension(150, 30));
+        txtPrice.setPreferredSize(new java.awt.Dimension(150, 30));
+        txtPrice.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtPriceKeyPressed(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtPriceKeyTyped(evt);
+            }
+        });
+
+        txtSqure.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtSqure.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        txtSqure.setMaximumSize(new java.awt.Dimension(150, 30));
+        txtSqure.setPreferredSize(new java.awt.Dimension(150, 30));
+        txtSqure.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtSqureKeyPressed(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtSqureKeyTyped(evt);
+            }
+        });
+
+        txtRoom.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtRoom.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        txtRoom.setMaximumSize(new java.awt.Dimension(150, 30));
+        txtRoom.setPreferredSize(new java.awt.Dimension(150, 30));
+        txtRoom.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtRoomKeyTyped(evt);
+            }
+        });
+
+        jLabel4.setFont(new java.awt.Font("Segoe UI Light", 3, 24)); // NOI18N
+        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel4.setText("Real Estate Information Viewer");
+
+        statusLabel.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        statusLabel.setText("Status");
+
+        jLabel5.setBackground(new java.awt.Color(102, 255, 102));
+        jLabel5.setForeground(new java.awt.Color(102, 255, 102));
+        jLabel5.setText("jLabel5");
+        jLabel5.setOpaque(true);
+
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/logo.png"))); // NOI18N
+
+        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/dialog-cancel-3.png"))); // NOI18N
+        jLabel3.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel3MouseClicked(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 468, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 368, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(34, 34, 34)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel2)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(statusLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addGap(21, 21, 21)
+                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 365, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                                .addComponent(lblLot, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(txtLot, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                                .addComponent(lblFname, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(txtFname, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                                .addComponent(lblLname, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(txtLname, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                                .addComponent(lblPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(txtPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                                .addComponent(lblSqr, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(txtSqure, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                                .addComponent(lblRoom, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(txtRoom, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(372, 372, 372))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addComponent(jLabel3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(5, 5, 5)
+                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
+                .addComponent(statusLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblLot, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtLot, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblFname, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtFname, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblLname, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtLname, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblSqr, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtSqure, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblRoom, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtRoom, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, 491, 491, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 559, Short.MAX_VALUE)
+        );
+
+        pack();
+        setLocationRelativeTo(null);
+    }// </editor-fold>                        
+
+    private void showHouse(ListHouse house) {
+        txtLot.setText(Integer.toString(house.lotNumber()));
+        txtFname.setText(house.firstName());
+        txtLname.setText(house.lastName());
+        txtPrice.setText(Integer.toString(house.price()));
+        txtSqure.setText(Integer.toString(house.squareFeet()));
+        txtRoom.setText(Integer.toString(house.bedRooms()));
+    }
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {                                         
+        txtLot.setText("");
+        txtFname.setText("");
+        txtLname.setText("");
+        txtPrice.setText("");
+        txtSqure.setText("");
+        txtRoom.setText("");
+
+        statusLabel.setText("");
+
+    }                                        
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {                                         
+
+        list.reset();
+        if (list.lengthIs() == 0) {
+            txtLot.setText("");
+            txtFname.setText("");
+            txtLname.setText("");
+            txtPrice.setText("");
+            txtSqure.setText("");
+            txtRoom.setText("");
+        } else {
+            house = (ListHouse) list.getNextItem();
+            showHouse(house);
+        }
+        statusLabel.setText("List reset");
+
+
+    }                                        
+
+    private void txtLotKeyTyped(java.awt.event.KeyEvent evt) {                                
+        char keychk = evt.getKeyChar();
+        if (!(Character.isDigit(keychk) || (keychk == KeyEvent.VK_BACKSPACE) || keychk == KeyEvent.VK_DELETE)) {
+            getToolkit().beep();
+            evt.consume();
+        }
+    }                               
+
+    private void txtFnameKeyTyped(java.awt.event.KeyEvent evt) {                                  
+        char keychk = evt.getKeyChar();
+        if (!(Character.isLetter(keychk) || (keychk == KeyEvent.VK_BACKSPACE) || keychk == KeyEvent.VK_DELETE || keychk == KeyEvent.VK_SPACE)) {
+            getToolkit().beep();
+            evt.consume();
+        }
+    }                                 
+
+    private void txtLnameKeyTyped(java.awt.event.KeyEvent evt) {                                  
+        char keychk = evt.getKeyChar();
+        if (!(Character.isLetter(keychk) || (keychk == KeyEvent.VK_BACKSPACE) || keychk == KeyEvent.VK_DELETE || keychk == KeyEvent.VK_SPACE)) {
+            getToolkit().beep();
+            evt.consume();
+        }
+    }                                 
+
+    private void txtPriceKeyTyped(java.awt.event.KeyEvent evt) {                                  
+        char keychk = evt.getKeyChar();
+        if (!(Character.isDigit(keychk) || (keychk == KeyEvent.VK_BACKSPACE) || keychk == KeyEvent.VK_DELETE || keychk == KeyEvent.VK_PERIOD)) {
+            getToolkit().beep();
+            evt.consume();
+        }
+    }                                 
+
+    private void txtSqureKeyTyped(java.awt.event.KeyEvent evt) {                                  
+        char keychk = evt.getKeyChar();
+        if (!(Character.isDigit(keychk) || (keychk == KeyEvent.VK_BACKSPACE) || keychk == KeyEvent.VK_DELETE)) {
+            getToolkit().beep();
+            evt.consume();
+        }
+    }                                 
+
+    private void txtRoomKeyTyped(java.awt.event.KeyEvent evt) {                                 
+        char keychk = evt.getKeyChar();
+        if (!(Character.isDigit(keychk) || (keychk == KeyEvent.VK_BACKSPACE) || keychk == KeyEvent.VK_DELETE)) {
+            getToolkit().beep();
+            evt.consume();
+        }
+    }                                
+
+    private void txtPriceKeyPressed(java.awt.event.KeyEvent evt) {                                    
+//        if( txtPrice.getText().isEmpty()){
+//            txtPrice.setText("Rs.");
+//        }
+//        else
+//        
+//        if( txtPrice.getText().equals("Rs.")){
+//            txtPrice.setText("");
+//        }
+    }                                   
+
+    private void txtSqureKeyPressed(java.awt.event.KeyEvent evt) {                                    
+//        if( txtSqure.getText().isEmpty()){
+//            txtSqure.setText("Sq.ft.");
+//        }
+//        else
+//        
+//        if( txtSqure.getText().equals("Sq.ft.")){
+//            txtSqure.setText("");
+//        }
+    }                                   
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {                                         
+
+        if (txtLot.getText().equals(null)) {
+//            getToolkit().beep();
+            JOptionPane.showMessageDialog(null, evt, null, JOptionPane.ERROR_MESSAGE);
+            txtLot.setText("0");
+        } else {
+
+            int lotNumber;
+            try {
+                lotNumber = Integer.parseInt(txtLot.getText());
+                house = new ListHouse("", "", lotNumber, 0, 0, 0);
+                if (list.isThere(house)) {
+                    house = (ListHouse) list.retrieve(house);
+                    showHouse(house);
+                    statusLabel.setText("House found");
+                } else {
+                    statusLabel.setText("House not found");
+                }
+            } catch (NumberFormatException badHouseData) {
+                // Text field info incorrectly formated
+                statusLabel.setText("Number? " + badHouseData.getMessage());
+            }
+
+//        int ltno = Integer.parseInt(txtLot.getText());
+//        lblStatus.setText("");
+//        HouseFile found = lh.find(ltno);
+//        
+//        if(found != null){
+//            txtFname.setText(found.getFirstName());
+//            txtLname.setText(found.getLastName());
+//            txtLot.setText(""+ found.getLotNumber());
+//            txtPrice.setText(""+ found.getPrice());
+//            txtSqure.setText(""+ found.getSquareFeet());
+//            txtRoom.setText("" + found.getBedRooms());
+//            
+////            System.out.println(""+found.getFirstName());
+//        }
+        }
+    }                                        
+
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {                                         
+
+        int ltno = Integer.parseInt(txtLot.getText());
+        String fname = txtFname.getText();
+        String lname = txtLname.getText();
+        int pricebox = Integer.parseInt(txtPrice.getText());
+        int sqft = Integer.parseInt(txtSqure.getText());
+        int noroom = Integer.parseInt(txtSqure.getText());
+
+        try {
+            house = new ListHouse(lname, fname, ltno, pricebox, sqft, noroom);
+            if (list.isThere(house)) {
+                statusLabel.setText("Lot number already in use");
+            } else {
+                list.insert(house);
+                statusLabel.setText("House added to list");
+            }
+        } catch (NumberFormatException badHouseData) {
+            // Text field info incorrectly formated
+            statusLabel.setText("Number? " + badHouseData.getMessage());
+        }
+
+//        HouseFile hf = new HouseFile(lname, fname, ltno, pricebox, sqft, noroom);
+//        lh.add(hf);
+//        
+//        System.out.println(""+hf);
+        txtLot.setText("");
+        txtFname.setText("");
+        txtLname.setText("");
+        txtPrice.setText("");
+        txtSqure.setText("");
+        txtRoom.setText("");
+
+
+    }                                        
+
+    private void jLabel3MouseClicked(java.awt.event.MouseEvent evt) {                                     
+
+//        lh.close();
+        System.out.println("labl");
+
+        try {
+            // Store info from list into house file
+            System.out.println("inside");
+            HouseFile.rewrite();
+            list.reset();
+            int length = list.lengthIs();
+            for (int counter = 1; counter <= length; counter++) {
+                house = (ListHouse) list.getNextItem();
+                HouseFile.putToFile(house);
+            }
+            HouseFile.close();
+        } catch (IOException fileCloseProblem) {
+            System.out
+                    .println("Exception raised concerning the house info file "
+                            + "upon program termination");
+        }
+        this.dispose();
+        
+    }                                    
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {                                         
+
+        if (list.lengthIs() == 0) {
+            statusLabel.setText("list is empty!");
+        } else {
+            house = (ListHouse) list.getNextItem();
+            showHouse(house);
+            statusLabel.setText("Next house displayed");
+        }
+
+//        int stat =  lh.houseList.size();
+//        
+////        String stat = HouseFile;
+////        lblStatus.setText(""+lh.next());
+//       lblStatus.setText(""+Integer.toString(stat));
+//       lh.next();
+    }                                        
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {                                         
+
+        int ltno = Integer.parseInt(txtLot.getText());
+        String fname = txtFname.getText();
+        String lname = txtLname.getText();
+        int pricebox = Integer.parseInt(txtPrice.getText());
+        int sqft = Integer.parseInt(txtSqure.getText());
+        int noroom = Integer.parseInt(txtSqure.getText());
+
+        try {
+            house = new ListHouse(lname, fname, ltno, pricebox, sqft, noroom);
+            if (list.isThere(house)) {
+                list.delete(house);
+                statusLabel.setText("House deleted");
+            } else {
+                statusLabel.setText("Lot number not on list");
+            }
+        } catch (NumberFormatException badHouseData) {
+            // Text field info incorrectly formated
+            statusLabel.setText("Number? " + badHouseData.getMessage());
+        }
+    }                                        
+
+    private void formWindowClosed(java.awt.event.WindowEvent evt) {                                  
+
+        
+    }                                 
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {                                   
+      
+        System.out.println("exit");
+        
+    }                                  
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(RealEstate.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(RealEstate.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(RealEstate.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(RealEstate.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new RealEstate().setVisible(true);
+            }
+        });
+    }
+
+    // Variables declaration - do not modify                     
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButton6;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JTextField jTextField3;
+    private javax.swing.JLabel lblFname;
+    private javax.swing.JLabel lblLname;
+    private javax.swing.JLabel lblLot;
+    private javax.swing.JLabel lblPrice;
+    private javax.swing.JLabel lblRoom;
+    private javax.swing.JLabel lblSqr;
+    private javax.swing.JLabel statusLabel;
+    private javax.swing.JTextField txtFname;
+    private javax.swing.JTextField txtLname;
+    private javax.swing.JTextField txtLot;
+    private javax.swing.JTextField txtPrice;
+    private javax.swing.JTextField txtRoom;
+    private javax.swing.JTextField txtSqure;
+    // End of variables declaration                   
 }

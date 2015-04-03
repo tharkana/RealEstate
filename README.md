@@ -9,11 +9,15 @@
  * permission of Team FantasticFive.
  *******************************************************************************/
 
+This is the module end project of 
+Degree - BSc in Computer Science (Hons) 3rd Year (Level 3) 
+Module - Data Structures and Algorithms (DSA)
+University-	University College Dublin (UCD), Ireland
+			National School of Business Management (NSBM), Sri Lanka.
+Supervised by - Dr. Sameh Abdalla (http://disi.unitn.it/~sameh/)
 
-3rd Year DSA Project of University College Dublin (UCD), Ireland at National School of Business Management (NSBM), Sri Lanka.
-
-~ Team FantasticFive ~
 ********************************************************************************
+Team FantasticFive
 
 * 14208893	Sahitha Nelanga De Silva
 * 14208971	Tharkana D Kodagoda

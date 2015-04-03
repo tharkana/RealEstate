@@ -9,14 +9,13 @@
 
 /**
  *
- * @author Kavindu
+ * @author 
  */
-package listPackage;
 
-public interface Listable {
+package housePackage;
 
-	public abstract int compareTo(Listable other);
 
-	public abstract Listable copy();
 
+public abstract class List {
+	
 }

@@ -9,13 +9,12 @@
 
 /**
  *
- * @author Tharkana
+ * @author
  */
 
-public class RealEstate {
+package housePackage;
 
-	public static void main(String[] args) {
-		System.out.println("blaaaaaaaa");
-	}
 
+public class SortedList  {
+	
 }

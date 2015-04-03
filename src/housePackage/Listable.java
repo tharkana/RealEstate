@@ -9,19 +9,12 @@
 
 /**
  *
- * @author Kavindu
+ * @author 
  */
+package housePackage;
 
-public class Test {
+public interface Listable {
 
-	public static void main(String[] args) {
-		System.out.println("Please use this class for testing");
-		System.out.println("Committing example"
-				+ "Before make any changes always pull the project from the GIT"
-				+ "This is how ur gonna commit the code"
-				+ "Save ur changes first"
-				+ "");
-
-	}
+	
 
 }
